@@ -2,11 +2,13 @@ import { Badge, Button, Col, Row, Stack } from 'react-bootstrap'
 import { useNote } from './NoteLayout'
 import { Link, useNavigate } from 'react-router-dom'
 import ReactMarkdown from 'react-markdown'
+import { CloudArrowDown } from 'react-bootstrap-icons'
+import axios from 'axios'
+import download from 'downloadjs'
 
 type NoteProps = {
   onDelete: (id: string) => void
 }
-
 
 export function Note({ onDelete }: NoteProps) {
   const navigate = useNavigate()
@@ -15,6 +17,15 @@ export function Note({ onDelete }: NoteProps) {
   const handleDelete = () => {
     onDelete(note.id)
     navigate("/")
+  }
+
+  const handleDownload = () => {
+    axios.post(`${import.meta.env.VITE_API_URL}/download`, { markdown: note.markdown })
+      .then(res => {
+        const blob = new Blob([res.data], { type: 'text/markdown' })
+        const url = window.URL.createObjectURL(blob)
+        download(url)
+      })
   }
 
   return (
@@ -43,6 +54,9 @@ export function Note({ onDelete }: NoteProps) {
                 Back
               </Button>
             </Link>
+            <Button variant="outline-primary" onClick={handleDownload}>
+              <CloudArrowDown /> Download
+            </Button>
           </Stack>
         </Col>
       </Row>
